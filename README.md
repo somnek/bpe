@@ -1,2 +1,3 @@
 # bpe
-byte pair encoder
+
+byte pair encoder implementation in Go

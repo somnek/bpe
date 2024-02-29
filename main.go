@@ -1,59 +1,43 @@
 package main
 
-import (
-	"fmt"
-	"strings"
-)
-
-type Pair struct {
-	a, b byte
-}
+import "fmt"
 
 func main() {
-	bytes := []byte(WIKI) // a.k.a 'ids' in karpathy's video
-	merges := []Pair{}
-	alien := 90
-	// encode
-	for j := 0; j < MAX_ITER; j++ {
-		fmt.Println(string(bytes))
-		stats := getStats(bytes)
-		maxPair, maxCount := findMaxPair(stats)
-		if maxCount <= 1 {
-			break
-		}
-		bytes = merge(bytes, maxPair, rune(alien-j))
-		merges = append(merges, maxPair)
-	}
+	// 'ids' in karpathy's video
+	// normalize to 0 - 256 (convert bytes to runes)
+	// convert string to runes right away won't works because the values goes beyond 256
+	bytes := []byte(WIKI)
+	runes := bytesToRunes(bytes)
+	stats := getStats(runes)
+	fmt.Println(stats)
 
 }
 
-func merge(bytes []byte, pair Pair, alien rune) []byte {
-	pairS := string(pair.a) + string(pair.b)
-	bytes = []byte(strings.ReplaceAll(string(bytes), pairS, string(alien)))
-	fmt.Printf(" %s -> %s\n", pairS, string(alien))
-	return bytes
+type Pair struct {
+	a, b rune
 }
 
-func getStats(bytes []byte) map[Pair]int {
+func getStats(runes []rune) map[Pair]int {
 	m := make(map[Pair]int)
-	for i := 0; i < len(bytes)-1; i++ {
-		pair := Pair{
-			a: bytes[i],
-			b: bytes[i+1],
-		}
+	for i := 0; i < len(runes)-1; i++ {
+		pair := Pair{runes[i], runes[i+1]}
 		m[pair]++
 	}
 	return m
 }
 
-func findMaxPair(m map[Pair]int) (Pair, int) {
-	var maxPair Pair
-	var maxCount int
-	for pair, count := range m {
-		if count > maxCount {
-			maxCount = count
-			maxPair = pair
-		}
+func bytesToRunes(bytes []byte) []rune {
+	var runeList []rune
+	for _, b := range bytes {
+		runeList = append(runeList, rune(b))
 	}
-	return maxPair, maxCount
+	return runeList
+}
+
+func runesToBytes(runes []rune) []byte {
+	var byteList []byte
+	for _, r := range runes {
+		byteList = append(byteList, byte(r))
+	}
+	return byteList
 }
