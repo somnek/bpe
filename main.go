@@ -10,34 +10,49 @@ type Pair struct {
 }
 
 func main() {
-	// bytes := []byte(WIKI)
-	sWiki := WIKI
-	out := 90
-
+	bytes := []byte(WIKI) // a.k.a 'ids' in karpathy's video
+	merges := []Pair{}
+	alien := 90
+	// encode
 	for j := 0; j < MAX_ITER; j++ {
-		m := make(map[Pair]int)
-		for i := 0; i < len(sWiki)-1; i++ {
-			pair := Pair{sWiki[i], sWiki[i+1]}
-			m[pair]++
-		}
-		// find max pair
-		maxPair, maxCount := findMaxPair(m)
+		fmt.Println(string(bytes))
+		stats := getStats(bytes)
+		maxPair, maxCount := findMaxPair(stats)
 		if maxCount <= 1 {
 			break
 		}
-		joinedPair := string(maxPair.a) + string(maxPair.b)
-		sWiki = strings.ReplaceAll(sWiki, joinedPair, string(rune(out-j)))
+		bytes = merge(bytes, maxPair, rune(alien-j))
+		merges = append(merges, maxPair)
 	}
-	fmt.Println("final: ", sWiki)
+
+}
+
+func merge(bytes []byte, pair Pair, alien rune) []byte {
+	pairS := string(pair.a) + string(pair.b)
+	bytes = []byte(strings.ReplaceAll(string(bytes), pairS, string(alien)))
+	fmt.Printf(" %s -> %s\n", pairS, string(alien))
+	return bytes
+}
+
+func getStats(bytes []byte) map[Pair]int {
+	m := make(map[Pair]int)
+	for i := 0; i < len(bytes)-1; i++ {
+		pair := Pair{
+			a: bytes[i],
+			b: bytes[i+1],
+		}
+		m[pair]++
+	}
+	return m
 }
 
 func findMaxPair(m map[Pair]int) (Pair, int) {
-	var maxCount int
 	var maxPair Pair
-	for p, count := range m {
-		if count >= maxCount {
+	var maxCount int
+	for pair, count := range m {
+		if count > maxCount {
 			maxCount = count
-			maxPair = p
+			maxPair = pair
 		}
 	}
 	return maxPair, maxCount
